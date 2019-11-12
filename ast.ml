@@ -36,7 +36,8 @@ type binop =
    the textbook as inspiration.
  ******************************************************************************)
 
-type expr = unit
+type expr = 
+  | EBool of bool 
 
 (******************************************************************************
    [defn] is the type of the AST for definitions. You may implement

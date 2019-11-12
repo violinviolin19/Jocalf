@@ -67,7 +67,7 @@ let make_string s =
   failwith "Unimplemented"
 
 let make_bool b =
-  failwith "Unimplemented"
+  EBool b
 
 let make_undefined () =
   failwith "Unimplemented"
