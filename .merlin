@@ -1,0 +1,7 @@
+B _build
+PKG oUnit
+PKG lwt
+PKG react
+PKG lambda-term
+PKG ocamlbuild
+PKG bisect_ppx-ocamlbuild
