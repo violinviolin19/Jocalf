@@ -38,6 +38,9 @@ type binop =
 
 type expr = 
   | EBool of bool 
+  | EInt of int
+  | EString of string
+  | EUndefined
 
 (******************************************************************************
    [defn] is the type of the AST for definitions. You may implement
