@@ -6,7 +6,6 @@ type value =
 type result = 
   |RValue of value
 
-type env = unit
 
 type state = unit
 
@@ -31,7 +30,8 @@ let eval_expr (e, env, st) =
   | EBool b -> (RValue (VBool b), st)
 
 let eval_defn (d, env, st) =
-  failwith "Unimplemented"
+  match d with
+  | 
 
 let eval_phrase (p, env, st) =
   failwith "Unimplemented"
