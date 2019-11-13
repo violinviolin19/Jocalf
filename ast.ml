@@ -41,6 +41,9 @@ type expr =
   | EInt of int
   | EString of string
   | EUndefined
+  | EAnd of bool * bool
+  | EOr of bool * bool
+  | EAdd of int * int 
 
 (******************************************************************************
    [defn] is the type of the AST for definitions. You may implement

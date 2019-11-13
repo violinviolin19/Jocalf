@@ -12,6 +12,8 @@ type result =
 
 type state = unit
 
+type env = unit
+
 let initial_env = ()
 
 let initial_state = ()
@@ -31,16 +33,18 @@ let string_of_env env =
 let string_of_state st =
   failwith "Unimplemented"
 
-let eval_expr (e, env, st) = 
+let rec eval_expr (e, env, st) = 
   match e with 
   | EBool b -> (RValue (VBool b), st)
   | EInt i -> (RValue (VInt i), st)
   | EString s -> (RValue (VString s), st)
   | EUndefined -> (RValue VUndefined, st)
+  | EAnd (b1, b2) -> (RValue (VBool (b1 && b2)), st)
+  | EOr (b1, b2) -> (RValue (VBool (b1 || b2)), st)
+  | EAdd (i1, i2) -> (RValue (VInt (i1 + i2)), st)
 
 let eval_defn (d, env, st) =
-  match d with
-  | 
+  failwith "unasdf"
 
 let eval_phrase (p, env, st) =
   failwith "Unimplemented"
