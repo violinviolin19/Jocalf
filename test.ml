@@ -14,6 +14,9 @@ let tests = [
      completed interpreter should pass all of them, though. *)
   "true", {|true|}, "true";
   "false", {|false|}, "false";
+  "int constant", {|42|}, "42";
+  "magic word", {|"xyzzy"|}, {|"xyzzy"|};
+  "undefined", {|undefined|}, "undefined";
   (* "int constant", {|42|}, "42";
      "negative int constant", {|-1|}, "-1";
      "max int", str_max_int, str_max_int;

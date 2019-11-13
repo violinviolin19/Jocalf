@@ -61,16 +61,16 @@ let make_var x =
   failwith "Unimplemented"
 
 let make_int s =
-  failwith "Unimplemented"
+  EInt (int_of_string s)
 
 let make_string s =
-  failwith "Unimplemented"
+  EString s
 
 let make_bool b =
   EBool b
 
 let make_undefined () =
-  failwith "Unimplemented"
+  EUndefined
 
 let make_object fields =
   failwith "Unimplemented"
