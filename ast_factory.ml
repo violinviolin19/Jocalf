@@ -24,10 +24,9 @@ let make_or e1 e2 =
   e1
 
 let make_if e1 e2 e3 =
-  failwith "Unimplemented"
-
+  EIf (e1, e2, e3)
 let make_if_partial e1 e2 =
-  failwith "Unimplemented"
+  EIf( e1, e2, EUndefined)
 
 let make_let x e1 e2 =
   ELet (x, e1, e2)
@@ -48,7 +47,7 @@ let make_ref e =
   failwith "Unimplemented"
 
 let make_fun xs e =
-  failwith "Unimplemented"
+  EFun (xs, e)
 
 let make_while e1 e2 =
   failwith "Unimplemented"

@@ -5,6 +5,7 @@ type value =
   | VInt of int
   | VString of string
   | VUndefined
+  | VClosure
 
 type result = 
   |RValue of value
@@ -24,6 +25,7 @@ let string_of_value  = function
   | VInt i -> string_of_int i 
   | VString s -> "\"" ^ String.escaped s ^ "\""
   | VUndefined -> "undefined"
+  | VClosure -> "<closure>"
 
 let string_of_result = function
   | RValue v -> string_of_value v
@@ -43,6 +45,8 @@ let rec eval_expr (e, env, st) =
   | EBinop (bop, e1, e2) -> eval_bop env st bop e1 e2
   | ELet (s, e1, e2) -> eval_let_expr env st s e1 e2
   | EVar x -> eval_var env st x
+  | EFun (_, _) -> (RValue VClosure, st)
+  | EIf (e1, e2, e3) -> eval_if env st e1 e2 e3 
 
 and eval_bop env st bop e1 e2= match (bop, eval_expr (e1, env, st), eval_expr
                                         (e2, env, st)) with 
@@ -58,6 +62,12 @@ and eval_let_expr env st s e1 e2 =
 and eval_var env st x =
   try (RValue (Env.find x env), st)
   with Not_found -> failwith "Unbound variable"
+
+and eval_if env st e1 e2 e3 = 
+  match fst(eval_expr (e1, env, st)) with 
+  | RValue(VBool true) -> eval_expr (e2, env, st)
+  | RValue(VBool false) -> eval_expr (e3, env, st)
+  | _ -> failwith "precondition violated"
 
 let rec eval_defn (d, (env:env), st) = 
   match d with 

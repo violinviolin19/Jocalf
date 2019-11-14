@@ -44,8 +44,8 @@ type expr =
   | EBinop of binop * expr * expr
   | ELet of string * expr * expr 
   | EVar of string
-  | EFun of string * expr 
-  | EApply of expr * expr
+  | EFun of string list * expr 
+  | EIf of expr * expr * expr
 
 (******************************************************************************
    [defn] is the type of the AST for definitions. You may implement
