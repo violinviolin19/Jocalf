@@ -43,7 +43,7 @@ type expr =
   | EUndefined
   | EAnd of bool * bool
   | EOr of bool * bool
-  | EAdd of int * int 
+  | EBinop of int * binop * int 
 
 (******************************************************************************
    [defn] is the type of the AST for definitions. You may implement

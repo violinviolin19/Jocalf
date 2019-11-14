@@ -41,7 +41,10 @@ let rec eval_expr (e, env, st) =
   | EUndefined -> (RValue VUndefined, st)
   | EAnd (b1, b2) -> (RValue (VBool (b1 && b2)), st)
   | EOr (b1, b2) -> (RValue (VBool (b1 || b2)), st)
-  | EAdd (i1, i2) -> (RValue (VInt (i1 + i2)), st)
+  | EBinop (i1, binop, i2) -> 
+    match binop with
+    | BopPlus -> (RValue (VInt (i1 + i2)), st)
+    | _ -> (RValue (VInt i1), st)
 
 let eval_defn (d, env, st) =
   failwith "unasdf"

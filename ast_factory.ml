@@ -19,10 +19,10 @@ let make_binop bop e1 e2 =
   failwith "Unimplemented"
 
 let make_and e1 e2 =
-  failwith "Unimplemented"
+  EAnd (e1, e2)
 
 let make_or e1 e2 =
-  failwith "Unimplemented"
+  EOr (e1, e2)
 
 let make_if e1 e2 e3 =
   failwith "Unimplemented"
