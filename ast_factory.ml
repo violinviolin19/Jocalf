@@ -1,7 +1,7 @@
 open Ast
 
 let make_let_defn x e =
-  failwith "Unimplemented"
+  DLet (x,e)
 
 let make_let_rec_defn f x e =
   failwith "Unimplemented"
@@ -16,13 +16,12 @@ let make_unop uop e =
   failwith "Unimplemented"
 
 let make_binop bop e1 e2 =
-  failwith "Unimplemented"
+  EBinop (bop, e1, e2)
 
 let make_and e1 e2 =
-  failwith "Unimplemented"
-
+  e1
 let make_or e1 e2 =
-  failwith "Unimplemented"
+  e1
 
 let make_if e1 e2 e3 =
   failwith "Unimplemented"
@@ -31,7 +30,7 @@ let make_if_partial e1 e2 =
   failwith "Unimplemented"
 
 let make_let x e1 e2 =
-  failwith "Unimplemented"
+  ELet (x, e1, e2)
 
 let make_let_rec f x e1 e2 =
   failwith "Unimplemented"
@@ -58,8 +57,7 @@ let make_delete_field e1 e2 =
   failwith "Unimplemented"
 
 let make_var x =
-  failwith "Unimplemented"
-
+  EVar x
 let make_int s =
   EInt (int_of_string s)
 
