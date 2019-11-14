@@ -47,6 +47,9 @@ let rec eval_expr (e, env, st) =
   | EVar x -> eval_var env st x
   | EFun (_, _) -> (RValue VClosure, st)
   | EIf (e1, e2, e3) -> eval_if env st e1 e2 e3 
+  | ESeq (e1, e2) -> eval_seq env st e1 e2
+  | EAnd (e1, e2) -> eval_and env st e1 e2
+  | EOr (e1, e2) -> eval_or env st e1 e2
 
 and eval_bop env st bop e1 e2= match (bop, eval_expr (e1, env, st), eval_expr
                                         (e2, env, st)) with 
@@ -68,6 +71,22 @@ and eval_if env st e1 e2 e3 =
   | RValue(VBool true) -> eval_expr (e2, env, st)
   | RValue(VBool false) -> eval_expr (e3, env, st)
   | _ -> failwith "precondition violated"
+
+and eval_seq env st e1 e2 = 
+  eval_expr (e1, env, st);
+  eval_expr (e2, env, st) 
+
+and eval_and env st e1 e2= 
+  let v1 = eval_expr (e1, env, st) in 
+  match fst v1 with 
+  |RValue (VBool false) -> v1 
+  | _ -> eval_expr (e2, env, st)
+
+and eval_or env st e1 e2= 
+  let v1 = eval_expr (e1, env, st) in 
+  match fst v1 with 
+  |RValue (VBool true) -> v1 
+  | _ -> eval_expr (e2, env, st)
 
 let rec eval_defn (d, (env:env), st) = 
   match d with 

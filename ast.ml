@@ -46,6 +46,9 @@ type expr =
   | EVar of string
   | EFun of string list * expr 
   | EIf of expr * expr * expr
+  | ESeq of expr * expr
+  | EAnd of expr * expr 
+  | EOr of expr * expr 
 
 (******************************************************************************
    [defn] is the type of the AST for definitions. You may implement

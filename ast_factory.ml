@@ -7,7 +7,7 @@ let make_let_rec_defn f x e =
   failwith "Unimplemented"
 
 let make_seq e1 e2 =
-  failwith "Unimplemented"
+  ESeq (e1, e2)
 
 let make_app e es =
   failwith "Unimplemented"
@@ -19,9 +19,10 @@ let make_binop bop e1 e2 =
   EBinop (bop, e1, e2)
 
 let make_and e1 e2 =
-  e1
+  EAnd (e1, e2)
+
 let make_or e1 e2 =
-  e1
+  EOr (e1, e2)
 
 let make_if e1 e2 e3 =
   EIf (e1, e2, e3)
