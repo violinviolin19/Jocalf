@@ -17,6 +17,12 @@ let tests = [
   "int constant", {|42|}, "42";
   "magic word", {|"xyzzy"|}, {|"xyzzy"|};
   "undefined", {|undefined|}, "undefined";
+  "plus", {|1 + 2|}, "3";
+  "sc_and", {|true && true|}, "true";
+  "sc_or", {|false || true|}, "false";
+  "let expr", {|let x = 22 in x|}, "22";
+  "anonymous function", {|fun (x) -> 0|}, "<closure>";
+  "if", {|if true then 22 else 0|}, "22";
   (* "int constant", {|42|}, "42";
      "negative int constant", {|-1|}, "-1";
      "max int", str_max_int, str_max_int;

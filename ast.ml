@@ -41,9 +41,14 @@ type expr =
   | EInt of int
   | EString of string
   | EUndefined
-  | EAnd of bool * bool
-  | EOr of bool * bool
-  | EBinop of int * binop * int 
+  | EBinop of binop * expr * expr
+  | ELet of string * expr * expr 
+  | EVar of string
+  | EFun of string list * expr 
+  | EIf of expr * expr * expr
+  | ERef of expr 
+  | EDeref of expr
+  | ERefA of expr * expr
 
 (******************************************************************************
    [defn] is the type of the AST for definitions. You may implement
@@ -52,7 +57,7 @@ type expr =
    simple.
  ******************************************************************************)
 
-type defn = unit
+type defn = DLet of string * expr
 
 (******************************************************************************
    [phrase] is the type of the AST for phrases. It is used by the
