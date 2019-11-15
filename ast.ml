@@ -49,6 +49,9 @@ type expr =
   | ERef of expr 
   | EDeref of expr
   | ERefA of expr * expr
+  | ESeq of expr * expr
+  | EAnd of expr * expr 
+  | EOr of expr * expr 
 
 (******************************************************************************
    [defn] is the type of the AST for definitions. You may implement

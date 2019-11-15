@@ -18,11 +18,15 @@ let tests = [
   "magic word", {|"xyzzy"|}, {|"xyzzy"|};
   "undefined", {|undefined|}, "undefined";
   "plus", {|1 + 2|}, "3";
-  "sc_and", {|true && true|}, "true";
-  "sc_or", {|false || true|}, "false";
+  "and", {|true && true|}, "true";
+  "or", {|false || true|}, "true";
+  "and_short", {|false && true|}, "false";
+  "or_short", {|true || true|}, "true";
   "let expr", {|let x = 22 in x|}, "22";
   "anonymous function", {|fun (x) -> 0|}, "<closure>";
   "if", {|if true then 22 else 0|}, "22";
+  "seq", {|5 + 2; 6|}, "6";
+  "seq2", {|5 + 2; 3+6|}, "9";
   (* "int constant", {|42|}, "42";
      "negative int constant", {|-1|}, "-1";
      "max int", str_max_int, str_max_int;

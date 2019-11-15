@@ -79,6 +79,9 @@ let rec eval_expr (e, env, st) =
   | ERef e1 -> eval_ref e1 env st
   | EDeref e1 -> eval_deref e1 env st 
   | ERefA (e1, e2) -> eval_ref_assign e1 e2 env st
+  | ESeq (e1, e2) -> eval_seq env st e1 e2
+  | EAnd (e1, e2) -> eval_and env st e1 e2
+  | EOr (e1, e2) -> eval_or env st e1 e2
 
 and eval_bop env st bop e1 e2= match (bop, eval_expr (e1, env, st), eval_expr
                                         (e2, env, st)) with 
@@ -118,6 +121,21 @@ and eval_ref_assign e1 e2 env st =
     else
       (RValue v2, (eval_assign v1 v2 st))
 
+and eval_seq env st e1 e2 = 
+  eval_expr (e1, env, st);
+  eval_expr (e2, env, st) 
+
+and eval_and env st e1 e2= 
+  let v1 = eval_expr (e1, env, st) in 
+  match fst v1 with 
+  |RValue (VBool false) -> v1 
+  | _ -> eval_expr (e2, env, st)
+
+and eval_or env st e1 e2= 
+  let v1 = eval_expr (e1, env, st) in 
+  match fst v1 with 
+  |RValue (VBool true) -> v1 
+  | _ -> eval_expr (e2, env, st)
 
 let rec eval_defn (d, (env:env), st) = 
   match d with 
