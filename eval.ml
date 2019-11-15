@@ -53,19 +53,22 @@ let rec alter_snd_list (v:string) lst =
             else h::alter_snd_list v t
 
 let eval_assign v1 v2 st = 
-  loc = loc + 1;
-  ((loc, v2)::(fst st) ,alter_snd_list v1 (snd st))
+  match v1 with
+  | VString s -> loc = loc + 1;
+  ((loc, v2)::(fst st) ,alter_snd_list s (snd st))
+  | _-> failwith "not supposed to happen either"
   
 
 
 let search_ref v st = 
   match v with 
-  | s -> search_map_list s (snd st) st
+  | VString s -> search_map_list s (snd st) st
+  | _ -> failwith "not a vstring for some reason"
 
 let string_of_state st =
   failwith "Unimplemented"
 
-let rec eval_expr (e, env, st) = 
+let rec eval_expr (e, env, (st:state)) = 
   match e with 
   | EBool b -> (RValue (VBool b), st)
   | EInt i -> (RValue (VInt i), st)
@@ -115,11 +118,12 @@ and eval_deref e env st =
 
 and eval_ref_assign e1 e2 env st =
   match fst(eval_expr(e1, env, st)), fst(eval_expr(e2, env, st)) with
-  | RValue (VString v1), RValue v2 -> 
+  | RValue v1, RValue v2 -> 
     if (search_ref v1 st) = VUndefined then 
       (RValue v2, st)
     else
       (RValue v2, (eval_assign v1 v2 st))
+  | _ -> failwith "impossible"
 
 and eval_seq env st e1 e2 = 
   eval_expr (e1, env, st);
