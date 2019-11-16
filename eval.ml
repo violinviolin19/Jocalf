@@ -7,8 +7,10 @@ type value =
   | VUndefined
   | VClosure
 
+
 type result = 
   |RValue of value
+  |RException of value
 
 let loc = -1
 
@@ -31,6 +33,7 @@ let string_of_value  = function
 
 let string_of_result = function
   | RValue v -> string_of_value v
+  | RException v -> "Exception: " ^ string_of_value v
 
 let string_of_env (env: env) =
   ""
@@ -85,6 +88,9 @@ let rec eval_expr (e, env, (st:state)) =
   | ESeq (e1, e2) -> eval_seq env st e1 e2
   | EAnd (e1, e2) -> eval_and env st e1 e2
   | EOr (e1, e2) -> eval_or env st e1 e2
+  | EThrow e1 -> eval_throw e1 env st
+  | ETry (e1, x, e2) -> eval_try e1 x e2 env st
+  | ETryFinally (e1, x, e2, e3) -> eval_try_finally
 
 and eval_bop env st bop e1 e2= match (bop, eval_expr (e1, env, st), eval_expr
                                         (e2, env, st)) with 
@@ -114,7 +120,7 @@ and eval_ref e env st =
 
 and eval_deref e env st = 
   match fst(eval_expr(e, env, st)) with 
-  | RValue v -> (RValue (search_ref v st), st)
+  | RValue v -> (RValue (search_ref v st), st) (*may need to fix idk*)
 
 and eval_ref_assign e1 e2 env st =
   match fst(eval_expr(e1, env, st)), fst(eval_expr(e2, env, st)) with
@@ -122,8 +128,23 @@ and eval_ref_assign e1 e2 env st =
     if (search_ref v1 st) = VUndefined then 
       (RValue v2, st)
     else
-      (RValue v2, (eval_assign v1 v2 st))
-  | _ -> failwith "impossible"
+      (RValue v2, (eval_assign v1 v2 st)) (*may need to fix, idk what eval _assign refers to anymore*)
+
+and eval_throw e env st = 
+  match fst(eval_expr(e, env, st)) with
+  | RValue v -> RException v, st
+  | _ -> failwith "I think this shouldn't happen" (*yeah dont know if its right*)
+
+and eval_try e1 x e2 env st =
+  match fst(eval_expr(e1, env, st)) with
+  | RValue v -> failwith "This is supposed to bind e1 to x and idk how to do that yet"
+  | RException v -> eval_expr(e2 env st)  (*again no idea if this works*)
+  
+and eval_try_finally e1 x e2 e3 env st= 
+  let r = eval_try e1 x e2 env st in 
+  match fst(eval_expr(e3, env, st)) with
+  | RException v -> RException v, st
+  | RValue v -> fst r, st
 
 and eval_seq env st e1 e2 = 
   eval_expr (e1, env, st);

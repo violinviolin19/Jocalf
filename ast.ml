@@ -52,6 +52,9 @@ type expr =
   | ESeq of expr * expr
   | EAnd of expr * expr 
   | EOr of expr * expr 
+  | EThrow of expr
+  | ETry of expr * string * expr
+  | ETryFinally of expr * string * expr * expr
 
 (******************************************************************************
    [defn] is the type of the AST for definitions. You may implement
