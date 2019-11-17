@@ -41,6 +41,7 @@ type expr =
   | EInt of int
   | EString of string
   | EUndefined
+  | EUnop  of unop * expr
   | EBinop of binop * expr * expr
   | ELet of string * expr * expr 
   | EVar of string
@@ -48,7 +49,6 @@ type expr =
   | EApp of expr * expr list
   | EIf of expr * expr * expr
   | ERef of expr 
-  | EDeref of expr
   | ERefA of expr * expr
   | ESeq of expr * expr
   | EAnd of expr * expr 

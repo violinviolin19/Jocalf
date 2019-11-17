@@ -46,7 +46,7 @@ let tests = [
      "apply wrong arity", {|(fun (x) -> 0) 1 2|}, 
      {|Exception: "Application: wrong number of arguments"|};
      "ref", {|ref 0|}, "<location>";
-     (* "deref undefined", {|!h|}, "undefined"; NEED TO CHANGE DEREF IMPLEMENTATION*)
+     "deref undefined", {|!h|}, "undefined";
      (*"assign non location", {|1 := 0|}, {|Exception: "Assignment to non-location"|}; *)
      (*"object", {|{"x":1}|}, "<object>";
      "length", {|length "bigred"|}, "6"; *)

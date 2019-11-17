@@ -7,7 +7,7 @@ type value =
   | VString of string
   | VUndefined
   | VClosure of string list * expr * env
-  | VLocation
+  | VLocation of string
 
 and env = (string * value) list
 
@@ -42,7 +42,7 @@ let string_of_value  = function
   | VString s -> "\"" ^ String.escaped s ^ "\""
   | VUndefined -> "undefined"
   | VClosure(_,_,_) -> "<closure>"
-  | VLocation -> "<location>"
+  | VLocation s-> "<location>"
 
 let string_of_result = function
   | RValue v -> string_of_value v
@@ -90,7 +90,7 @@ let rec eval_expr (e, env, (st:state)) =
   | EInt i -> (RValue (VInt i), st)
   | EString s -> (RValue (VString s), st)
   | EUndefined -> (RValue VUndefined, st)
-  (* | EUnop (uop, e1) -> eval_uop env st uop e1 *)
+  | EUnop (uop, e1) -> eval_uop env st uop e1
   | EBinop (bop, e1, e2) -> eval_bop env st bop e1 e2
   | ELet (s, e1, e2) -> eval_let_expr env st s e1 e2
   | EVar x -> eval_var env st x
@@ -98,7 +98,6 @@ let rec eval_expr (e, env, (st:state)) =
   | EApp (e, es) -> eval_fun env st e es
   | EIf (e1, e2, e3) -> eval_if env st e1 e2 e3 
   | ERef e1 -> eval_ref e1 env st
-  | EDeref e1 -> eval_deref e1 env st (*should be added to unop*)
   | ERefA (e1, e2) -> eval_ref_assign e1 e2 env st
   | ESeq (e1, e2) -> eval_seq env st e1 e2
   | EAnd (e1, e2) -> eval_and env st e1 e2
@@ -107,11 +106,19 @@ let rec eval_expr (e, env, (st:state)) =
   | ETry (e1, x, e2) -> eval_try e1 x e2 env st
   | ETryFinally (e1, x, e2, e3) -> eval_try_finally e1 x e2 e3 env st
 
-and eval_bop env st bop e1 e2= match (bop, eval_expr (e1, env, st), eval_expr
-                                        (e2, env, st)) with 
-| BopPlus, (RValue (VInt a), st1), (RValue (VInt b), st2) -> 
+and eval_bop env st bop e1 e2= 
+  match (bop, eval_expr (e1, env, st), eval_expr
+    (e2, env, st)) with 
+  | BopPlus, (RValue (VInt a), st1), (RValue (VInt b), st2) -> 
   (RValue (VInt (a + b)), st)
-| _ -> failwith "bprecondition violated"
+  | _ -> failwith "bprecondition violated"
+
+and eval_uop env st uop e1 = 
+  match uop, fst(eval_expr(e1, env, st)) with
+  | UopDeref, RValue (VLocation v) -> (RValue (search_ref (VString v) st), st)
+  | UopDeref, RException v -> (RValue (VUndefined), st)
+  (* | UopNot, RValue v -> (RVAlue) *)
+  | _ -> failwith "asdf"
 
 and eval_let_expr env st s e1 e2 = 
   let v1 = fst(eval_expr(e1, env, st)) in 
@@ -128,16 +135,13 @@ and eval_if env st e1 e2 e3 =
   | RValue(VBool false) -> eval_expr (e3, env, st)
   | _ -> failwith "aprecondition violated"
 
-and eval_ref e env st = 
+and eval_ref e env st = (*i think i messed this up and will need to grab an old version*)
   loc = loc + 1;
   match fst(eval_expr(e, env, st)) with
-  | RValue v -> (RValue VLocation,((loc,v)::(fst st), snd st))
+  | RValue VLocation v -> (RValue (VLocation v),((loc,VString v)::(fst st), snd st))
+  | RValue x -> failwith (string_of_value x)
   | _ -> failwith "need to change later"
 
-and eval_deref e env st = 
-  match fst(eval_expr(e, env, st)) with 
-  | RValue v -> (RValue (search_ref v st), st) (*may need to fix idk*)
-  | RException v -> (RException (VString "Assignment to non-location"), st)
 
 and eval_ref_assign e1 e2 env st =
   match fst(eval_expr(e1, env, st)), fst(eval_expr(e2, env, st)) with
@@ -204,6 +208,7 @@ and eval_let_defn env st s e =
   let v1 = fst(eval_expr (e, env, st)) in 
   match v1 with 
   |RValue v -> (v1, (s, v)::env, st)
+  |_ -> failwith "not done yet"
 
 
 let eval_phrase (p, env, st) =
@@ -211,7 +216,8 @@ let eval_phrase (p, env, st) =
   | Expr e -> 
     let r = eval_expr (e, env, st) in
     (fst r, env, st)
-  | _ -> failwith "def not implenented yet"
+  | Defn e -> eval_defn (e, env, st)
+    
 
 let eval_expr_init e =
   eval_expr (e, initial_env, initial_state)

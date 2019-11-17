@@ -13,7 +13,7 @@ let make_app e es =
   EApp (e, es)
   
 let make_unop uop e =
-  failwith "mUnimplemented"
+  EUnop (uop, e)
 
 let make_binop bop e1 e2 =
   EBinop (bop, e1, e2)
