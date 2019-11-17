@@ -179,7 +179,7 @@ and eval_or env st e1 e2=
   | _ -> eval_expr (e2, env, st)
 
 and eval_fun env st e es = 
-  match fst (eval_expr e) with 
+  match fst (eval_expr (e, env, st)) with 
   |RValue (VClosure(xs, e1, env)) -> eval_app env st e1 es xs
   | _ -> failwith "not gonna happen"
 
