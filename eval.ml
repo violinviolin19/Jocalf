@@ -34,7 +34,7 @@ let rec add_to_env v x env st accu =
   match env with
   | [] -> (x,v)::accu
   | h :: t -> if fst h = x then (x, v)::accu @ t 
-              else add_to_env v x t st (h::accu)
+    else add_to_env v x t st (h::accu)
 
 let string_of_value  = function 
   | VBool b -> string_of_bool b
@@ -102,15 +102,16 @@ let rec eval_expr (e, env, (st:state)) =
   | ESeq (e1, e2) -> eval_seq env st e1 e2
   | EAnd (e1, e2) -> eval_and env st e1 e2
   | EOr (e1, e2) -> eval_or env st e1 e2
+  | EWhile (e1, e2) -> eval_while env st e1 e2
   | EThrow e1 -> eval_throw e1 env st
   | ETry (e1, x, e2) -> eval_try e1 x e2 env st
   | ETryFinally (e1, x, e2, e3) -> eval_try_finally e1 x e2 e3 env st
 
 and eval_bop env st bop e1 e2= 
   match (bop, eval_expr (e1, env, st), eval_expr
-    (e2, env, st)) with 
+           (e2, env, st)) with 
   | BopPlus, (RValue (VInt a), st1), (RValue (VInt b), st2) -> 
-  (RValue (VInt (a + b)), st)
+    (RValue (VInt (a + b)), st)
   | _ -> failwith "bprecondition violated"
 
 and eval_uop env st uop e1 = 
@@ -120,22 +121,22 @@ and eval_uop env st uop e1 =
   | UopDeref, RException v -> (RValue (VUndefined), st)
   | UopNot, RValue v -> 
     (match v with 
-    | VBool b -> (RValue (VBool (not b)), st)
-    | _ -> failwith "not done with unot yet") 
+     | VBool b -> (RValue (VBool (not b)), st)
+     | _ -> failwith "not done with unot yet") 
   | UopTypeof, RValue v -> 
     (match v with
-    | VString s -> RValue (VString "string"), st
-    | VInt i -> RValue (VString "int"), st
-    | VUndefined -> RValue (VString "undefined"), st
-    | VBool b -> RValue (VString "bool"), st
-    | VLocation l -> RValue (VString "location"), st
-    | VClosure (_,_,_) -> RValue (VString "closure"), st)
-    (* add typeof object later*)
+     | VString s -> RValue (VString "string"), st
+     | VInt i -> RValue (VString "int"), st
+     | VUndefined -> RValue (VString "undefined"), st
+     | VBool b -> RValue (VString "bool"), st
+     | VLocation l -> RValue (VString "location"), st
+     | VClosure (_,_,_) -> RValue (VString "closure"), st)
+  (* add typeof object later*)
   | UopMinus, RValue v ->
     (match v with
-    | VUndefined -> (RValue (VUndefined), st)
-    | VInt i -> (RValue (VInt (- i)), st)
-    | _ -> failwith "need to implement uop minus where strings can be converted to an int etc")
+     | VUndefined -> (RValue (VUndefined), st)
+     | VInt i -> (RValue (VInt (- i)), st)
+     | _ -> failwith "need to implement uop minus where strings can be converted to an int etc")
   | _ -> failwith "asdf"
 
 and eval_let_expr env st s e1 e2 = 
@@ -154,7 +155,7 @@ and eval_if env st e1 e2 e3 =
   match fst(eval_expr (e1, env, st)) with 
   | RValue(VBool true) -> eval_expr (e2, env, st)
   | RValue(VBool false) -> eval_expr (e3, env, st)
-  | _ -> failwith "aprecondition violated"
+  | _ -> failwith "precondition violated"
 
 and eval_ref e env st =
   loc = loc + 1;
@@ -219,16 +220,19 @@ and eval_app env st e es xs =
     end 
   | _ -> RException(VString "Application: wrong number of arguments"), st
 
+and eval_while env st e1 e2 = 
+  let expr = EIf (e1, ESeq (e2, eval_while env st e1 e2), EUndefined) in 
 
-let rec eval_defn (d, (env:env), st) = 
-  match d with 
-  | DLet (s, e) -> eval_let_defn env st s e
 
-and eval_let_defn env st s e = 
-  let v1 = fst(eval_expr (e, env, st)) in 
-  match v1 with 
-  |RValue v -> (v1, (s, v)::env, st)
-  |_ -> failwith "not done yet"
+  let rec eval_defn (d, (env:env), st) = 
+    match d with 
+    | DLet (s, e) -> eval_let_defn env st s e
+
+  and eval_let_defn env st s e = 
+    let v1 = fst(eval_expr (e, env, st)) in 
+    match v1 with 
+    |RValue v -> (v1, (s, v)::env, st)
+    |_ -> failwith "not done yet"
 
 
 let eval_phrase (p, env, st) =
@@ -237,7 +241,7 @@ let eval_phrase (p, env, st) =
     let r = eval_expr (e, env, st) in
     (fst r, env, st)
   | Defn e -> eval_defn (e, env, st)
-    
+
 
 let eval_expr_init e =
   eval_expr (e, initial_env, initial_state)
