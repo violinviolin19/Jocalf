@@ -132,7 +132,7 @@ and eval_uop env st uop e1 =
     | VLocation l -> (RValue (VBool false), st)
     (* add cases for extern and object*)
     | VClosure (_,_,_) -> (RValue (VBool false), st)
-    | VUndefined -> (RValue (VBool false), st)
+    | VUndefined -> (RValue (VBool true), st)
     | _ -> failwith "not done with unot yet") 
   | UopTypeof, RValue v -> 
     (match v with
@@ -155,7 +155,8 @@ and eval_let_expr env st s e1 e2 =
   match v1 with 
   (* |RValue (VLocation v) -> eval_expr (e2, env, (fst st, (s,loc)::(snd st))) 
       not sure what to do*)
-  |RValue v -> eval_expr (e2, (s, v):: env, st)
+  | RValue (VLocation v) -> eval_expr (e2, env, ((loc, v)::(fst st), snd st))
+  | RValue v -> eval_expr (e2, (s, v):: env, st)
   |_ -> failwith "not done yetlet_expr"
 
 and eval_var env st x = (*need this to work for states and ref *)
@@ -239,7 +240,8 @@ let rec eval_defn (d, (env:env), st) =
 and eval_let_defn env st s e = 
   let v1 = fst(eval_expr (e, env, st)) in 
   match v1 with 
-  |RValue v -> (v1, (s, v)::env, st)
+  | RValue (VLocation v) -> v1, env, (loc, v)::(fst st), (s,loc)::(snd st)
+  | RValue v -> (v1, (s, v)::env, st)
   |_ -> failwith "not done yet"
 
 
