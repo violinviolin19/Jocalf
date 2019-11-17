@@ -121,6 +121,18 @@ and eval_uop env st uop e1 =
   | UopNot, RValue v -> 
     (match v with 
     | VBool b -> (RValue (VBool (not b)), st)
+    | VString s -> 
+      (match s with
+      | "" -> (RValue (VBool true), st)
+      | _-> (RValue (VBool false), st))
+    | VInt i -> 
+      (match i with
+      | 0 -> (RValue (VBool true), st)
+      | _ -> (RValue (VBool false), st))
+    | VLocation l -> (RValue (VBool false), st)
+    (* add cases for extern and object*)
+    | VClosure (_,_,_) -> (RValue (VBool false), st)
+    | VUndefined -> (RValue (VBool false), st)
     | _ -> failwith "not done with unot yet") 
   | UopTypeof, RValue v -> 
     (match v with
