@@ -245,7 +245,7 @@ let rec eval_defn (d, (env:env), st) =
 and eval_let_defn env st s e = 
   let v1 = fst(eval_expr (e, env, st)) in 
   match v1 with 
-  | RValue (VLocation v) -> v1, env, (loc, v)::(fst st), (s,loc)::(snd st)
+  | RValue (VLocation v) -> v1, env, ((loc, v)::(fst st), (s,loc)::(snd st))
   | RValue v -> (v1, (s, v)::env, st)
   |_ -> failwith "not done yet"
 
