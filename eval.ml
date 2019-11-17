@@ -122,6 +122,18 @@ and eval_uop env st uop e1 =
   | UopNot, RValue v -> 
     (match v with 
      | VBool b -> (RValue (VBool (not b)), st)
+     | VString s -> 
+       (match s with
+        | "" -> (RValue (VBool true), st)
+        | _-> (RValue (VBool false), st))
+     | VInt i -> 
+       (match i with
+        | 0 -> (RValue (VBool true), st)
+        | _ -> (RValue (VBool false), st))
+     | VLocation l -> (RValue (VBool false), st)
+     (* add cases for extern and object*)
+     | VClosure (_,_,_) -> (RValue (VBool false), st)
+     | VUndefined -> (RValue (VBool false), st)
      | _ -> failwith "not done with unot yet") 
   | UopTypeof, RValue v -> 
     (match v with
@@ -136,7 +148,8 @@ and eval_uop env st uop e1 =
     (match v with
      | VUndefined -> (RValue (VUndefined), st)
      | VInt i -> (RValue (VInt (- i)), st)
-     | _ -> failwith "need to implement uop minus where strings can be converted to an int etc")
+     | _ -> failwith "need to implement uop minus where strings 
+     can be converted to an int etc")
   | _ -> failwith "asdf"
 
 and eval_let_expr env st s e1 e2 = 
@@ -221,18 +234,18 @@ and eval_app env st e es xs =
   | _ -> RException(VString "Application: wrong number of arguments"), st
 
 and eval_while env st e1 e2 = 
-  let expr = EIf (e1, ESeq (e2, eval_while env st e1 e2), EUndefined) in 
+  eval_expr (EIf (e1, (ESeq (e2, EWhile (e1, e2))), EUndefined), env, st)
 
 
-  let rec eval_defn (d, (env:env), st) = 
-    match d with 
-    | DLet (s, e) -> eval_let_defn env st s e
+let rec eval_defn (d, (env:env), st) = 
+  match d with 
+  | DLet (s, e) -> eval_let_defn env st s e
 
-  and eval_let_defn env st s e = 
-    let v1 = fst(eval_expr (e, env, st)) in 
-    match v1 with 
-    |RValue v -> (v1, (s, v)::env, st)
-    |_ -> failwith "not done yet"
+and eval_let_defn env st s e = 
+  let v1 = fst(eval_expr (e, env, st)) in 
+  match v1 with 
+  |RValue v -> (v1, (s, v)::env, st)
+  |_ -> failwith "not done yet"
 
 
 let eval_phrase (p, env, st) =
