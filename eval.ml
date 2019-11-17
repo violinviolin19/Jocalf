@@ -7,7 +7,7 @@ type value =
   | VString of string
   | VUndefined
   | VClosure of string list * expr * env
-  | VLocation of string
+  | VLocation of value
 
 and env = (string * value) list
 
@@ -26,7 +26,7 @@ type state = ((int * value) list) * ((string *int) list)
 let initial_env = []
 
 let initial_state:state = ([],[])
-
+(*i think i messed this up and will need to grab an old version*)
 (** [add_to_env] will add the mapping of a variable name to its value to the
     env if not in the env already, or remap the variable name to a new given
     value, then return a new updated environment*)
@@ -57,7 +57,7 @@ let rec search_loc_list i lst =
 
 
 let rec search_map_list s lst st = 
-  match lst with
+  match lst with(*i think i messed this up and will need to grab an old version*)
   | [] -> VUndefined
   | h :: t -> if fst h = s then search_loc_list (snd h) (fst st) 
     else search_map_list s t st
@@ -68,7 +68,7 @@ let rec alter_snd_list (v:string) lst =
   | h::t -> if (fst h) = v then (v, loc)::t 
     else h::alter_snd_list v t
 
-let eval_assign v1 v2 st = 
+let eval_ref_assign_helper v1 v2 st = (*i think i messed this up and will need to grab an old version*)
   match v1 with
   | VString s -> loc = loc + 1;
     ((loc, v2)::(fst st) ,alter_snd_list s (snd st))
@@ -115,17 +115,38 @@ and eval_bop env st bop e1 e2=
 
 and eval_uop env st uop e1 = 
   match uop, fst(eval_expr(e1, env, st)) with
-  | UopDeref, RValue (VLocation v) -> (RValue (search_ref (VString v) st), st)
+  | UopDeref, RValue (VLocation v) -> 
+    (RValue (search_ref (VString (string_of_value v)) st), st)
   | UopDeref, RException v -> (RValue (VUndefined), st)
-  (* | UopNot, RValue v -> (RVAlue) *)
+  | UopNot, RValue v -> 
+    (match v with 
+    | VBool b -> (RValue (VBool (not b)), st)
+    | _ -> failwith "not done with unot yet") 
+  | UopTypeof, RValue v -> 
+    (match v with
+    | VString s -> RValue (VString "string"), st
+    | VInt i -> RValue (VString "int"), st
+    | VUndefined -> RValue (VString "undefined"), st
+    | VBool b -> RValue (VString "bool"), st
+    | VLocation l -> RValue (VString "location"), st
+    | VClosure (_,_,_) -> RValue (VString "closure"), st)
+    (* add typeof object later*)
+  | UopMinus, RValue v ->
+    (match v with
+    | VUndefined -> (RValue (VUndefined), st)
+    | VInt i -> (RValue (VInt (- i)), st)
+    | _ -> failwith "need to implement uop minus where strings can be converted to an int etc")
   | _ -> failwith "asdf"
 
 and eval_let_expr env st s e1 e2 = 
   let v1 = fst(eval_expr(e1, env, st)) in 
   match v1 with 
+  (* |RValue (VLocation v) -> eval_expr (e2, env, (fst st, (s,loc)::(snd st))) 
+      not sure what to do*)
   |RValue v -> eval_expr (e2, (s, v):: env, st)
+  |_ -> failwith "not done yetlet_expr"
 
-and eval_var env st x =
+and eval_var env st x = (*need this to work for states and ref *)
   try (RValue (List.assoc x env), st)
   with Not_found -> RException(VString "Unbound variable"),st
 
@@ -135,11 +156,10 @@ and eval_if env st e1 e2 e3 =
   | RValue(VBool false) -> eval_expr (e3, env, st)
   | _ -> failwith "aprecondition violated"
 
-and eval_ref e env st = (*i think i messed this up and will need to grab an old version*)
+and eval_ref e env st =
   loc = loc + 1;
   match fst(eval_expr(e, env, st)) with
-  | RValue VLocation v -> (RValue (VLocation v),((loc,VString v)::(fst st), snd st))
-  | RValue x -> failwith (string_of_value x)
+  | RValue v -> (RValue (VLocation v),((loc, v)::(fst st), snd st))
   | _ -> failwith "need to change later"
 
 
@@ -149,7 +169,7 @@ and eval_ref_assign e1 e2 env st =
     if (search_ref v1 st) = VUndefined then 
       (RValue v2, st)
     else
-      (RValue v2, (eval_assign v1 v2 st)) (*may need to fix, idk what eval _assign refers to anymore*)
+      (RValue v2, (eval_ref_assign_helper v1 v2 st)) (*may need to fix, idk what eval _assign refers to anymore*)
 
 and eval_throw e env st = 
   match fst(eval_expr(e, env, st)) with

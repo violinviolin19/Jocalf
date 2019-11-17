@@ -12,7 +12,7 @@ let make_seq e1 e2 =
 let make_app e es =
   EApp (e, es)
   
-let make_unop uop e =
+let make_unop uop e = (*need to turn -1 as not a - applied to 1 but a "-1"*)
   EUnop (uop, e)
 
 let make_binop bop e1 e2 =
