@@ -47,10 +47,16 @@ type expr =
   | EFun of string list * expr 
   | EApp of expr * expr list
   | EIf of expr * expr * expr
+  | ERef of expr 
+  | EDeref of expr
+  | ERefA of expr * expr
   | ESeq of expr * expr
   | EAnd of expr * expr 
   | EOr of expr * expr 
   (* | EWhile of expr * expr  *)
+  | EThrow of expr
+  | ETry of expr * string * expr
+  | ETryFinally of expr * string * expr * expr
 
 (******************************************************************************
    [defn] is the type of the AST for definitions. You may implement

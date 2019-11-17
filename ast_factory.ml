@@ -35,16 +35,16 @@ let make_let_rec f x e1 e2 =
   failwith "Unimplemented"
 
 let make_try e1 x e2 =
-  failwith "Unimplemented"
+  ETry (e1, x, e2)
 
 let make_try_finally e1 x e2 e3 =
-  failwith "Unimplemented"
+  ETryFinally (e1, x, e2, e3)
 
 let make_throw e =
   failwith "Unimplemented"
 
 let make_ref e =
-  failwith "Unimplemented"
+  ERef e (*need to change*)
 
 let make_fun xs e =
   EFun (xs, e)
