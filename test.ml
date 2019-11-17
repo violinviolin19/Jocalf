@@ -36,13 +36,13 @@ let tests = [
      "true", {|true|}, "true";
      "false", {|false|}, "false";
      "undefined", {|undefined|}, "undefined";
-     (*"magic word", {|"xyzzy"|}, {|"xyzzy"|};
-     "div by 0", {|4/0|}, {|Exception: "Division by zero"|};
+     "magic word", {|"xyzzy"|}, {|"xyzzy"|};
+     (* "div by 0", {|4/0|}, {|Exception: "Division by zero"|};
      "mod by 0", {|4 mod 0|}, {|Exception: "Division by zero"|}; *)
      "unbound var", {|let x = 0 in y|}, {|Exception: "Unbound variable"|};
      "throw", {|throw 0|}, "Exception: 0";
-     (* "anonymous function", {|fun (x) -> 0|}, "<closure>"; *)
-     (* "apply non-function", {|0 0|}, {|Exception: "Application: not a function"|}; *)
+     "anonymous function", {|fun (x) -> 0|}, "<closure>";
+     "apply non-function", {|0 0|}, {|Exception: "Application: not a function"|};
      (* "apply wrong arity", {|(fun (x) -> 0) 1 2|}, 
      {|Exception: "Application: wrong number of arguments"|}; *)
      "ref", {|ref 0|}, "<location>";

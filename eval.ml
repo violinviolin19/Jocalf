@@ -181,7 +181,7 @@ and eval_or env st e1 e2=
 and eval_fun env st e es = 
   match fst (eval_expr (e, env, st)) with 
   |RValue (VClosure(xs, e1, env)) -> eval_app env st e1 es xs
-  | _ -> failwith "not gonna happen"
+  | _ -> RException (VString "Application: not a function"), st
 
 and eval_app env st e es xs = 
   match es, xs with 
@@ -190,9 +190,9 @@ and eval_app env st e es xs =
       match r with 
       |RValue v -> if (List.mem_assoc s1 env) then eval_app env st e t1 t2
         else eval_app ((s1, v) :: env) st e t1 t2
-      | _ -> failwith "not gonna happen"
+      | _ -> failwith "bnot gonna happen"
     end 
-  | _ -> failwith "not gonna happen"
+  | _ -> failwith "cnot gonna happen"
 
 
 let rec eval_defn (d, (env:env), st) = 
