@@ -25,6 +25,8 @@ let tests = [
   "let expr", {|let x = 22 in x|}, "22";
   "anonymous function", {|fun (x) -> 0|}, "<closure>";
   "if", {|if true then 22 else 0|}, "22";
+  "if", {|if true then 22|}, "22";
+  "if", {|if false then 22|}, "undefined";
   "seq", {|5 + 2; 6|}, "6";
   "seq2", {|5 + 2; 3+6|}, "9";
   (* "int constant", {|42|}, "42";

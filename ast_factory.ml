@@ -10,8 +10,7 @@ let make_seq e1 e2 =
   ESeq (e1, e2)
 
 let make_app e es =
-  failwith "Unimplemented"
-
+  EApp (e, es)
 let make_unop uop e =
   failwith "Unimplemented"
 
@@ -51,6 +50,7 @@ let make_fun xs e =
   EFun (xs, e)
 
 let make_while e1 e2 =
+  (* EWhile (e1, e2) *)
   failwith "Unimplemented"
 
 let make_delete_field e1 e2 =

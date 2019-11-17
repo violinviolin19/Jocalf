@@ -1,22 +1,24 @@
 open Ast
 
+
 type value = 
   | VBool of bool
   | VInt of int
   | VString of string
   | VUndefined
-  | VClosure
+  | VClosure of string list * expr * env
+
+and env = (string * value) list
 
 type result = 
   |RValue of value
 
 module Env = Map.Make(String)
 
-type env = value Env.t
 
 type state = unit
 
-let initial_env = Env.empty
+let initial_env = []
 
 let initial_state = ()
 
@@ -25,7 +27,7 @@ let string_of_value  = function
   | VInt i -> string_of_int i 
   | VString s -> "\"" ^ String.escaped s ^ "\""
   | VUndefined -> "undefined"
-  | VClosure -> "<closure>"
+  | VClosure(_,_,_) -> "<closure>"
 
 let string_of_result = function
   | RValue v -> string_of_value v
@@ -36,7 +38,7 @@ let string_of_env (env: env) =
 let string_of_state st =
   failwith "Unimplemented"
 
-let rec eval_expr (e, env, st) = 
+let rec eval_expr (e, (env:env), st) = 
   match e with 
   | EBool b -> (RValue (VBool b), st)
   | EInt i -> (RValue (VInt i), st)
@@ -45,7 +47,8 @@ let rec eval_expr (e, env, st) =
   | EBinop (bop, e1, e2) -> eval_bop env st bop e1 e2
   | ELet (s, e1, e2) -> eval_let_expr env st s e1 e2
   | EVar x -> eval_var env st x
-  | EFun (_, _) -> (RValue VClosure, st)
+  | EFun (xs, e) -> (RValue (VClosure(xs, e, env)), st)
+  | EApp (e, es) -> eval_app env st e es 
   | EIf (e1, e2, e3) -> eval_if env st e1 e2 e3 
   | ESeq (e1, e2) -> eval_seq env st e1 e2
   | EAnd (e1, e2) -> eval_and env st e1 e2
@@ -60,10 +63,10 @@ and eval_bop env st bop e1 e2= match (bop, eval_expr (e1, env, st), eval_expr
 and eval_let_expr env st s e1 e2 = 
   let v1 = fst(eval_expr(e1, env, st)) in 
   match v1 with 
-  |RValue v -> eval_expr (e2, Env.add s v env, st)
+  |RValue v -> eval_expr (e2, (s, v):: env, st)
 
 and eval_var env st x =
-  try (RValue (Env.find x env), st)
+  try (RValue (List.assoc x env), st)
   with Not_found -> failwith "Unbound variable"
 
 and eval_if env st e1 e2 e3 = 
@@ -73,7 +76,7 @@ and eval_if env st e1 e2 e3 =
   | _ -> failwith "precondition violated"
 
 and eval_seq env st e1 e2 = 
-  eval_expr (e1, env, st);
+  (eval_expr (e1, env, st)) |> ignore;
   eval_expr (e2, env, st) 
 
 and eval_and env st e1 e2= 
@@ -88,14 +91,23 @@ and eval_or env st e1 e2=
   |RValue (VBool true) -> v1 
   | _ -> eval_expr (e2, env, st)
 
+and eval_app env st e es = 
+  match es with 
+  | [] -> 
+  | exp :: t -> begin match eval env e1 with
+      | Closure (x, e, defenv) -> 
+        let v2 = eval env e2 in
+        eval defenv e
+    end
+
 let rec eval_defn (d, (env:env), st) = 
   match d with 
   | DLet (s, e) -> eval_let_defn env st s e
 
-and eval_let_defn (env:env) st s e = 
+and eval_let_defn env st s e = 
   let v1 = fst(eval_expr (e, env, st)) in 
   match v1 with 
-  |RValue v -> (v1, Env.add s v env, st)
+  |RValue v -> (v1, (s, v)::env, st)
 
 
 let eval_phrase (p, env, st) =
