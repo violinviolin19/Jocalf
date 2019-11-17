@@ -7,6 +7,7 @@ type value =
   | VString of string
   | VUndefined
   | VClosure of string list * expr * env
+  | VLocation
 
 and env = (string * value) list
 
@@ -26,12 +27,22 @@ let initial_env = []
 
 let initial_state:state = ([],[])
 
+(** [add_to_env] will add the mapping of a variable name to its value to the
+    env if not in the env already, or remap the variable name to a new given
+    value, then return a new updated environment*)
+let rec add_to_env v x env st accu = 
+  match env with
+  | [] -> (x,v)::accu
+  | h :: t -> if fst h = x then (x, v)::accu @ t 
+              else add_to_env v x t st (h::accu)
+
 let string_of_value  = function 
   | VBool b -> string_of_bool b
   | VInt i -> string_of_int i 
   | VString s -> "\"" ^ String.escaped s ^ "\""
   | VUndefined -> "undefined"
   | VClosure(_,_,_) -> "<closure>"
+  | VLocation -> "<location>"
 
 let string_of_result = function
   | RValue v -> string_of_value v
@@ -86,20 +97,20 @@ let rec eval_expr (e, env, (st:state)) =
   | EApp (e, es) -> eval_app env st e es 
   | EIf (e1, e2, e3) -> eval_if env st e1 e2 e3 
   | ERef e1 -> eval_ref e1 env st
-  | EDeref e1 -> eval_deref e1 env st 
+  | EDeref e1 -> eval_deref e1 env st (*should be added to unop*)
   | ERefA (e1, e2) -> eval_ref_assign e1 e2 env st
   | ESeq (e1, e2) -> eval_seq env st e1 e2
   | EAnd (e1, e2) -> eval_and env st e1 e2
   | EOr (e1, e2) -> eval_or env st e1 e2
   | EThrow e1 -> eval_throw e1 env st
   | ETry (e1, x, e2) -> eval_try e1 x e2 env st
-  | ETryFinally (e1, x, e2, e3) -> eval_try_finally
+  | ETryFinally (e1, x, e2, e3) -> eval_try_finally e1 x e2 e3 env st
 
 and eval_bop env st bop e1 e2= match (bop, eval_expr (e1, env, st), eval_expr
                                         (e2, env, st)) with 
 | BopPlus, (RValue (VInt a), st1), (RValue (VInt b), st2) -> 
   (RValue (VInt (a + b)), st)
-| _ -> failwith "precondition violated"
+| _ -> failwith "bprecondition violated"
 
 and eval_let_expr env st s e1 e2 = 
   let v1 = fst(eval_expr(e1, env, st)) in 
@@ -108,22 +119,24 @@ and eval_let_expr env st s e1 e2 =
 
 and eval_var env st x =
   try (RValue (List.assoc x env), st)
-  with Not_found -> failwith "Unbound variable"
+  with Not_found -> RException(VString "Unbound variable"),st
 
 and eval_if env st e1 e2 e3 = 
   match fst(eval_expr (e1, env, st)) with 
   | RValue(VBool true) -> eval_expr (e2, env, st)
   | RValue(VBool false) -> eval_expr (e3, env, st)
-  | _ -> failwith "precondition violated"
+  | _ -> failwith "aprecondition violated"
 
 and eval_ref e env st = 
   loc = loc + 1;
   match fst(eval_expr(e, env, st)) with
-  | RValue v -> (RValue v,((loc,v)::(fst st), snd st))
+  | RValue v -> (RValue VLocation,((loc,v)::(fst st), snd st))
+  | _ -> failwith "need to change later"
 
 and eval_deref e env st = 
   match fst(eval_expr(e, env, st)) with 
   | RValue v -> (RValue (search_ref v st), st) (*may need to fix idk*)
+  | RException v -> (RException (VString "Assignment to non-location"), st)
 
 and eval_ref_assign e1 e2 env st =
   match fst(eval_expr(e1, env, st)), fst(eval_expr(e2, env, st)) with
@@ -140,8 +153,8 @@ and eval_throw e env st =
 
 and eval_try e1 x e2 env st =
   match fst(eval_expr(e1, env, st)) with
-  | RValue v -> failwith "This is supposed to bind e1 to x and idk how to do that yet"
-  | RException v -> eval_expr(e2 env st)  (*again no idea if this works*)
+  | RValue v -> RValue v,st
+  | RException v -> RValue v, st (*again no idea if this works*)
 
 and eval_try_finally e1 x e2 e3 env st= 
   let r = eval_try e1 x e2 env st in 
@@ -166,13 +179,14 @@ and eval_or env st e1 e2=
   | _ -> eval_expr (e2, env, st)
 
 and eval_app env st e es = 
-  match es with 
+  failwith "asdf"
+  (* match es with 
   | [] -> 
   | exp :: t -> begin match eval env e1 with
       | Closure (x, e, defenv) -> 
         let v2 = eval env e2 in
         eval defenv e
-    end
+    end *)
 
 let rec eval_defn (d, (env:env), st) = 
   match d with 

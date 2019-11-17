@@ -4,15 +4,16 @@ let make_let_defn x e =
   DLet (x,e)
 
 let make_let_rec_defn f x e =
-  failwith "Unimplemented"
+  failwith "lUnimplemented"
 
 let make_seq e1 e2 =
   ESeq (e1, e2)
 
 let make_app e es =
   EApp (e, es)
+  
 let make_unop uop e =
-  failwith "Unimplemented"
+  failwith "mUnimplemented"
 
 let make_binop bop e1 e2 =
   EBinop (bop, e1, e2)
@@ -32,7 +33,7 @@ let make_let x e1 e2 =
   ELet (x, e1, e2)
 
 let make_let_rec f x e1 e2 =
-  failwith "Unimplemented"
+  failwith "iUnimplemented"
 
 let make_try e1 x e2 =
   ETry (e1, x, e2)
@@ -41,7 +42,7 @@ let make_try_finally e1 x e2 e3 =
   ETryFinally (e1, x, e2, e3)
 
 let make_throw e =
-  failwith "Unimplemented"
+  EThrow e
 
 let make_ref e =
   ERef e (*need to change*)
@@ -51,10 +52,10 @@ let make_fun xs e =
 
 let make_while e1 e2 =
   (* EWhile (e1, e2) *)
-  failwith "Unimplemented"
+  failwith "hUnimplemented"
 
 let make_delete_field e1 e2 =
-  failwith "Unimplemented"
+  failwith "fUnimplemented"
 
 let make_var x =
   EVar x
@@ -71,7 +72,7 @@ let make_undefined () =
   EUndefined
 
 let make_object fields =
-  failwith "Unimplemented"
+  failwith "bUnimplemented"
 
 let make_get_field e1 e2 =
-  failwith "Unimplemented"
+  failwith "rUnimplemented"
