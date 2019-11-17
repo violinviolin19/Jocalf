@@ -83,7 +83,7 @@ let rec eval_expr (e, env, (st:state)) =
   | ELet (s, e1, e2) -> eval_let_expr env st s e1 e2
   | EVar x -> eval_var env st x
   | EFun (xs, e) -> (RValue (VClosure(xs, e, env)), st)
-  | EApp (e, es) -> eval_app env st e es 
+  | EApp (e, es) -> eval_fun env st e es
   | EIf (e1, e2, e3) -> eval_if env st e1 e2 e3 
   | ERef e1 -> eval_ref e1 env st
   | EDeref e1 -> eval_deref e1 env st 
@@ -141,7 +141,7 @@ and eval_throw e env st =
 and eval_try e1 x e2 env st =
   match fst(eval_expr(e1, env, st)) with
   | RValue v -> failwith "This is supposed to bind e1 to x and idk how to do that yet"
-  | RException v -> eval_expr(e2 env st)  (*again no idea if this works*)
+  | RException v -> eval_expr(e2,env,st)  (*again no idea if this works*)
 
 and eval_try_finally e1 x e2 e3 env st= 
   let r = eval_try e1 x e2 env st in 
@@ -165,14 +165,22 @@ and eval_or env st e1 e2=
   |RValue (VBool true) -> v1 
   | _ -> eval_expr (e2, env, st)
 
-and eval_app env st e es = 
-  match es with 
-  | [] -> 
-  | exp :: t -> begin match eval env e1 with
-      | Closure (x, e, defenv) -> 
-        let v2 = eval env e2 in
-        eval defenv e
-    end
+and eval_fun env st e es = 
+  match fst (eval_expr e) with 
+  |RValue (VClosure(xs, e1, env)) -> eval_app env st e1 es xs
+  | _ -> failwith "not gonna happen"
+
+and eval_app env st e es xs = 
+  match es, xs with 
+  | [], [] -> eval_expr (e, env, st)
+  | (e1 :: t1), (s1::t2) -> let r = fst(eval_expr (e1, env, st)) in begin 
+      match r with 
+      |RValue v -> if (List.mem_assoc s1 env) then eval_app env st e t1 t2
+        else eval_app ((s1, v) :: env) st e t1 t2
+      | _ -> failwith "not gonna happen"
+    end 
+  | _ -> failwith "not gonna happen"
+
 
 let rec eval_defn (d, (env:env), st) = 
   match d with 
