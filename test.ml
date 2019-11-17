@@ -43,8 +43,8 @@ let tests = [
      "throw", {|throw 0|}, "Exception: 0";
      "anonymous function", {|fun (x) -> 0|}, "<closure>";
      "apply non-function", {|0 0|}, {|Exception: "Application: not a function"|};
-     (* "apply wrong arity", {|(fun (x) -> 0) 1 2|}, 
-     {|Exception: "Application: wrong number of arguments"|}; *)
+     "apply wrong arity", {|(fun (x) -> 0) 1 2|}, 
+     {|Exception: "Application: wrong number of arguments"|};
      "ref", {|ref 0|}, "<location>";
      (* "deref undefined", {|!h|}, "undefined"; NEED TO CHANGE DEREF IMPLEMENTATION*)
      (*"assign non location", {|1 := 0|}, {|Exception: "Assignment to non-location"|}; *)

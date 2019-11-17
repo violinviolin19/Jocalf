@@ -90,6 +90,7 @@ let rec eval_expr (e, env, (st:state)) =
   | EInt i -> (RValue (VInt i), st)
   | EString s -> (RValue (VString s), st)
   | EUndefined -> (RValue VUndefined, st)
+  (* | EUnop (uop, e1) -> eval_uop env st uop e1 *)
   | EBinop (bop, e1, e2) -> eval_bop env st bop e1 e2
   | ELet (s, e1, e2) -> eval_let_expr env st s e1 e2
   | EVar x -> eval_var env st x
@@ -192,7 +193,7 @@ and eval_app env st e es xs =
         else eval_app ((s1, v) :: env) st e t1 t2
       | _ -> failwith "bnot gonna happen"
     end 
-  | _ -> failwith "cnot gonna happen"
+  | _ -> RException(VString "Application: wrong number of arguments"), st
 
 
 let rec eval_defn (d, (env:env), st) = 
@@ -206,7 +207,11 @@ and eval_let_defn env st s e =
 
 
 let eval_phrase (p, env, st) =
-  failwith "Unimplemented"
+  match p with
+  | Expr e -> 
+    let r = eval_expr (e, env, st) in
+    (fst r, env, st)
+  | _ -> failwith "def not implenented yet"
 
 let eval_expr_init e =
   eval_expr (e, initial_env, initial_state)
