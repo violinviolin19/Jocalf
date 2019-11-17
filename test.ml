@@ -31,25 +31,26 @@ let tests = [
   "seq2", {|5 + 2; 3+6|}, "9";
   "int constant", {|42|}, "42";
   (* "negative int constant", {|-1|}, "-1"; *)
-     (* "max int", str_max_int, str_max_int; *)
-     (* "min int", str_min_int, str_min_int; *)
-     "true", {|true|}, "true";
-     "false", {|false|}, "false";
-     "undefined", {|undefined|}, "undefined";
-     "magic word", {|"xyzzy"|}, {|"xyzzy"|};
-     (* "div by 0", {|4/0|}, {|Exception: "Division by zero"|};
+  (* "max int", str_max_int, str_max_int; *)
+  (* "min int", str_min_int, str_min_int; *)
+  "true", {|true|}, "true";
+  "false", {|false|}, "false";
+  "undefined", {|undefined|}, "undefined";
+  "magic word", {|"xyzzy"|}, {|"xyzzy"|};
+  (* "div by 0", {|4/0|}, {|Exception: "Division by zero"|};
      "mod by 0", {|4 mod 0|}, {|Exception: "Division by zero"|}; *)
-     "unbound var", {|let x = 0 in y|}, {|Exception: "Unbound variable"|};
-     "throw", {|throw 0|}, "Exception: 0";
-     "anonymous function", {|fun (x) -> 0|}, "<closure>";
-     "apply non-function", {|0 0|}, {|Exception: "Application: not a function"|};
-     "apply wrong arity", {|(fun (x) -> 0) 1 2|}, 
-     {|Exception: "Application: wrong number of arguments"|};
-     "ref", {|ref 0|}, "<location>";
-     "deref undefined", {|!h|}, "undefined";
-     (*"assign non location", {|1 := 0|}, {|Exception: "Assignment to non-location"|}; *)
-     (*"object", {|{"x":1}|}, "<object>";
-     "length", {|length "bigred"|}, "6"; *)
+  "unbound var", {|let x = 0 in y|}, {|Exception: "Unbound variable"|};
+  "throw", {|throw 0|}, "Exception: 0";
+  "anonymous function", {|fun (x) -> 0|}, "<closure>";
+  "apply non-function", {|0 0|}, {|Exception: "Application: not a function"|};
+  "apply wrong arity", {|(fun (x) -> 0) 1 2|}, 
+  {|Exception: "Application: wrong number of arguments"|};
+  "ref", {|ref 0|}, "<location>";
+  "deref undefined", {|!h|}, "undefined";
+  (*"assign non location", {|1 := 0|}, 
+    {|Exception: "Assignment to non-location"|}; *)
+  (*"object", {|{"x":1}|}, "<object>";
+    "length", {|length "bigred"|}, "6"; *)
 ]
 
 let make_interp_expr_test n in_str out_str =

@@ -18,8 +18,6 @@ type result =
 
 let loc = -1
 
-module Env = Map.Make(String)
-
 
 type state = ((int * value) list) * ((string *int) list)
 
