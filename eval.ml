@@ -161,7 +161,9 @@ and eval_let_expr env st s e1 e2 =
 
 and eval_var env st x = (*need this to work for states and ref *)
   try (RValue (List.assoc x env), st)
-  with Not_found -> RException(VString "Unbound variable"),st
+  with Not_found -> 
+    try (RValue ((List.assoc (List.assoc x (snd st)) (fst st))), st) 
+    with Not_found -> RException(VString "Unbound variable"),st
 
 and eval_if env st e1 e2 e3 = 
   match fst(eval_expr (e1, env, st)) with 
