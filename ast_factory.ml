@@ -11,7 +11,7 @@ let make_seq e1 e2 =
 
 let make_app e es =
   EApp (e, es)
-  
+
 let make_unop uop e = (*need to turn -1 as not a - applied to 1 but a "-1"*)
   EUnop (uop, e)
 
@@ -51,8 +51,7 @@ let make_fun xs e =
   EFun (xs, e)
 
 let make_while e1 e2 =
-  (* EWhile (e1, e2) *)
-  failwith "hUnimplemented"
+  EWhile (e1, e2)
 
 let make_delete_field e1 e2 =
   failwith "fUnimplemented"
