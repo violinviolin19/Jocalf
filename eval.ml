@@ -18,6 +18,7 @@ type result =
 
 let loc = -1
 
+type loc = int
 
 type state = ((int * value) list) * ((string *int) list)
 
@@ -39,15 +40,22 @@ let string_of_value  = function
   | VInt i -> string_of_int i 
   | VString s -> "\"" ^ String.escaped s ^ "\""
   | VUndefined -> "undefined"
-  | VClosure(_,_,_) -> "<closure>"
+  | VClosure(_,_,_) -> "<closure>" 
   | VLocation s-> "<location>"
 
 let string_of_result = function
   | RValue v -> string_of_value v
   | RException v -> "Exception: " ^ string_of_value v
 
+let env_helper lst str = 
+  match lst with 
+  | [] -> str 
+  | h :: t -> str ^ "\n" ^ h
+
 let string_of_env (env: env) =
-  ""
+  let lst = List.map (fun (x,y) -> x ^ ", " ^ string_of_value y) env in 
+  env_helper lst ""
+
 let rec search_loc_list i lst =
   match lst with
   | [] -> failwith "impossible loc"
@@ -71,8 +79,6 @@ let eval_ref_assign_helper v1 v2 st = (*i think i messed this up and will need t
   | VString s -> loc = loc + 1;
     ((loc, v2)::(fst st) ,alter_snd_list s (snd st))
   | _-> failwith "not supposed to happen either"
-
-
 
 let search_ref v st = 
   match v with 
@@ -153,17 +159,14 @@ and eval_uop env st uop e1 =
 and eval_let_expr env st s e1 e2 = 
   let v1 = fst(eval_expr(e1, env, st)) in 
   match v1 with 
-  (* |RValue (VLocation v) -> eval_expr (e2, env, (fst st, (s,loc)::(snd st))) 
-      not sure what to do*)
-  | RValue (VLocation v) -> eval_expr (e2, env, ((loc, v)::(fst st), snd st))
   | RValue v -> eval_expr (e2, (s, v):: env, st)
-  |_ -> failwith "not done yetlet_expr"
+  |_ -> failwith "oops"
 
 and eval_var env st x = (*need this to work for states and ref *)
   try (RValue (List.assoc x env), st)
   with Not_found -> 
-    try (RValue ((List.assoc (List.assoc x (snd st)) (fst st))), st) 
-    with Not_found -> RException(VString "Unbound variable"),st
+  try (RValue ((List.assoc (List.assoc x (snd st)) (fst st))), st) 
+  with Not_found -> RException(VString "Unbound variable"),st
 
 and eval_if env st e1 e2 e3 = 
   match fst(eval_expr (e1, env, st)) with 
@@ -189,12 +192,11 @@ and eval_ref_assign e1 e2 env st =
 and eval_throw e env st = 
   match fst(eval_expr(e, env, st)) with
   | RValue v -> RException v, st
-  | _ -> failwith "I think this shouldn't happen" (*yeah dont know if its right*)
-
+  | _ -> failwith "I think this shouldn't happen" 
 and eval_try e1 x e2 env st =
   match fst(eval_expr(e1, env, st)) with
   | RValue v -> RValue v,st
-  | RException v -> eval_expr(e2,env,st)  (*again no idea if this works*)
+  | RException v -> eval_expr(e2,env,st)  
 
 and eval_try_finally e1 x e2 e3 env st= 
   let r = eval_try e1 x e2 env st in 
